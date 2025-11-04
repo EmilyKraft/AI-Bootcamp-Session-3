@@ -55,6 +55,25 @@ function TaskList({ onEdit }) {
     }
   };
 
+  const handlePriorityChange = async (task, newPriority) => {
+    if (!['P1','P2','P3'].includes(newPriority)) return;
+    try {
+      await fetch(`/api/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: task.title,
+            description: task.description,
+            due_date: task.due_date,
+            priority: newPriority
+        })
+      });
+      fetchTasks();
+    } catch (err) {
+      setError('Failed to change task priority');
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
@@ -204,13 +223,25 @@ function TaskList({ onEdit }) {
               }}
             >
               {task.priority && (
-                <span
-                  className={`priority-badge ${task.priority}`}
-                  aria-label={`Priority ${task.priority}`}
-                  data-testid={`task-priority-${task.id}`}
+                <Box 
+                  className="priority-toggle-group"
+                  role="radiogroup"
+                  aria-label={`Change priority for task ${task.title}`}
+                  sx={{ display: 'flex', gap: 0.5 }}
                 >
-                  {task.priority}
-                </span>
+                  {['P1','P2','P3'].map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => handlePriorityChange(task, p)}
+                      className={`priority-toggle ${task.priority === p ? 'selected' : ''}`}
+                      role="radio"
+                      aria-checked={task.priority === p}
+                      aria-label={`Set priority ${p}`}
+                      data-testid={`task-${task.id}-priority-${p.toLowerCase()}`}
+                    >{p}</button>
+                  ))}
+                </Box>
               )}
               {task.due_date && (
                 <Chip

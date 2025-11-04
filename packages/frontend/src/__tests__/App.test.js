@@ -166,4 +166,36 @@ describe('TODO App', () => {
       expect(screen.getByText('No tasks found.')).toBeInTheDocument();
     });
   });
+
+  test('inline priority change updates task', async () => {
+    let tasks = [
+      { id: 1, title: 'Task A', description: 'Desc A', due_date: '2025-09-30', priority: 'P2', completed: 0 },
+      { id: 2, title: 'Task B', description: 'Desc B', due_date: null, priority: 'P3', completed: 0 }
+    ];
+    server.use(
+      rest.get('/api/tasks', (req, res, ctx) => {
+        return res(ctx.status(200), ctx.json(tasks));
+      }),
+      rest.put('/api/tasks/:id', (req, res, ctx) => {
+        const id = Number(req.params.id);
+        const idx = tasks.findIndex(t => t.id === id);
+        if (idx === -1) return res(ctx.status(404));
+        const updated = { ...tasks[idx], ...req.body };
+        tasks[idx] = updated;
+        return res(ctx.status(200), ctx.json(updated));
+      })
+    );
+    const user = userEvent.setup();
+    await act(async () => { render(<App />); });
+    await waitFor(() => { expect(screen.getByText('Task A')).toBeInTheDocument(); });
+    const p1Btn = screen.getByTestId('task-1-priority-p1');
+    // Initially P2 is selected
+    const p2Btn = screen.getByTestId('task-1-priority-p2');
+    expect(p2Btn.className).toMatch(/selected/);
+    await user.click(p1Btn);
+    await waitFor(() => {
+      expect(p1Btn.className).toMatch(/selected/);
+      expect(p2Btn.className).not.toMatch(/selected/);
+    });
+  });
 });
