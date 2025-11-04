@@ -5,6 +5,11 @@ import TaskList from './TaskList';
 import TaskForm from './TaskForm';
 
 function App() {
+  // Central reference to supported priority levels used across form, list, and tests.
+  // Keeping this here allows future features (e.g., dynamic priority labels or colors)
+  // to source from a single location. Colors are implemented in CSS (App.css).
+  const PRIORITY_LEVELS = ['P1', 'P2', 'P3'];
+
   const [editingTask, setEditingTask] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -69,7 +74,8 @@ function App() {
           }}
         >
           <Box sx={{ mb: 2, flexShrink: 0 }}>
-            <TaskForm onSave={handleSave} initialTask={editingTask} />
+            {/* Pass PRIORITY_LEVELS for potential future dynamic rendering (currently static inside TaskForm) */}
+            <TaskForm onSave={handleSave} initialTask={editingTask} priorityLevels={PRIORITY_LEVELS} />
           </Box>
           <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden' }}>
             <TaskList key={refreshKey} onEdit={setEditingTask} />

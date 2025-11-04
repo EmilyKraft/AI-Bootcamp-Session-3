@@ -204,24 +204,13 @@ function TaskList({ onEdit }) {
               }}
             >
               {task.priority && (
-                <Chip
-                  label={task.priority}
-                  size="small"
+                <span
+                  className={`priority-badge ${task.priority}`}
                   aria-label={`Priority ${task.priority}`}
                   data-testid={`task-priority-${task.id}`}
-                  sx={{
-                    height: 20,
-                    fontSize: '0.65rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.5px',
-                    color: '#fff',
-                    backgroundColor: task.priority === 'P1'
-                      ? '#d32f2f'
-                      : task.priority === 'P2'
-                        ? '#ff9800'
-                        : '#9e9e9e'
-                  }}
-                />
+                >
+                  {task.priority}
+                </span>
               )}
               {task.due_date && (
                 <Chip
