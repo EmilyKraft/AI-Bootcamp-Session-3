@@ -148,7 +148,12 @@ function TaskForm({ onSave, initialTask }) {
             }
           }}
         />
-        <Box className="priority-toggle-group" role="group" aria-label="Task Priority" data-testid="priority-group">
+        <Box 
+          className="priority-toggle-group" 
+          role="radiogroup" 
+          aria-label="Task Priority" 
+          data-testid="priority-group"
+        >
           {['P1','P2','P3'].map(val => (
             <button
               key={val}
@@ -156,7 +161,9 @@ function TaskForm({ onSave, initialTask }) {
               onClick={() => setPriority(val)}
               data-testid={`priority-${val.toLowerCase()}`}
               className={`priority-toggle ${priority === val ? 'selected' : ''}`}
-              aria-pressed={priority === val}
+              role="radio"
+              aria-checked={priority === val}
+              aria-label={`Set priority ${val}`}
             >
               {val}
             </button>
