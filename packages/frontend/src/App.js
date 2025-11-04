@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './App.css'; // Ensure priority button styles are applied
 import { CssBaseline, Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import TaskList from './TaskList';
@@ -10,24 +11,24 @@ function App() {
   // to source from a single location. Colors are implemented in CSS (App.css).
   const PRIORITY_LEVELS = ['P1', 'P2', 'P3'];
 
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleSave = async (task) => {
-    if (editingTask) {
-      // Edit existing task
-      await fetch(`/api/tasks/${editingTask.id}`, {
+  const handleSave = async (item) => {
+    if (editingItem) {
+      // Edit existing item
+      await fetch(`/api/items/${editingItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task)
+        body: JSON.stringify(item)
       });
-      setEditingTask(null);
+      setEditingItem(null);
     } else {
-      // Add new task
-      await fetch('/api/tasks', {
+      // Add new item
+      await fetch('/api/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task)
+        body: JSON.stringify(item)
       });
     }
     setRefreshKey(k => k + 1);
@@ -74,11 +75,11 @@ function App() {
           }}
         >
           <Box sx={{ mb: 2, flexShrink: 0 }}>
-            {/* Pass PRIORITY_LEVELS for potential future dynamic rendering (currently static inside TaskForm) */}
-            <TaskForm onSave={handleSave} initialTask={editingTask} priorityLevels={PRIORITY_LEVELS} />
+            {/* Pass PRIORITY_LEVELS for potential future dynamic rendering (currently static inside ItemForm) */}
+            <TaskForm onSave={handleSave} initialTask={editingItem} priorityLevels={PRIORITY_LEVELS} />
           </Box>
           <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden' }}>
-            <TaskList key={refreshKey} onEdit={setEditingTask} />
+            <TaskList key={refreshKey} onEdit={setEditingItem} />
           </Box>
         </Container>
       </Box>

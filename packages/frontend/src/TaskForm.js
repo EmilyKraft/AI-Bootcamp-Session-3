@@ -3,11 +3,11 @@ import { TextField, Button, Paper, Typography, Box, ToggleButtonGroup, ToggleBut
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 
-function TaskForm({ onSave, initialTask }) {
-  const [title, setTitle] = useState(initialTask?.title || '');
-  const [description, setDescription] = useState(initialTask?.description || '');
-  const [dueDate, setDueDate] = useState(initialTask?.due_date || '');
-  const [priority, setPriority] = useState(initialTask?.priority || 'P3');
+function TaskForm({ onSave, initialItem }) {
+  const [title, setTitle] = useState(initialItem?.title || '');
+  const [description, setDescription] = useState(initialItem?.description || '');
+  const [dueDate, setDueDate] = useState(initialItem?.due_date || '');
+  const [priority, setPriority] = useState(initialItem?.priority || 'P3');
   const [error, setError] = useState(null);
 
   // Helper to normalize date string to YYYY-MM-DD format
@@ -25,20 +25,20 @@ function TaskForm({ onSave, initialTask }) {
     return `${year}-${month}-${day}`;
   };
 
-  // Update form fields when initialTask changes (editing mode)
+  // Update form fields when initialItem changes (editing mode)
   useEffect(() => {
-    if (initialTask) {
-      setTitle(initialTask.title || '');
-      setDescription(initialTask.description || '');
-      setDueDate(normalizeDateString(initialTask.due_date));
-      setPriority(initialTask.priority || 'P3');
+    if (initialItem) {
+      setTitle(initialItem.title || '');
+      setDescription(initialItem.description || '');
+      setDueDate(normalizeDateString(initialItem.due_date));
+      setPriority(initialItem.priority || 'P3');
     } else {
       setTitle('');
       setDescription('');
       setDueDate('');
       setPriority('P3');
     }
-  }, [initialTask]);
+  }, [initialItem]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,12 +77,12 @@ function TaskForm({ onSave, initialTask }) {
           mb: 1.5
         }}
       >
-        {initialTask ? 'Edit Task' : 'Add Task'}
+  {initialItem ? 'Edit Item' : 'Add Item'}
       </Typography>
       <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={1.5}>
         <TextField
-          id="task-title"
-          label="Task Title"
+          id="item-title"
+          label="Item Title"
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
@@ -103,7 +103,7 @@ function TaskForm({ onSave, initialTask }) {
           }}
         />
         <TextField
-          id="task-description"
+          id="item-description"
           label="Description"
           value={description}
           onChange={e => setDescription(e.target.value)}
@@ -126,7 +126,7 @@ function TaskForm({ onSave, initialTask }) {
           }}
         />
         <TextField
-          id="task-due-date"
+          id="item-due-date"
           label="Due Date"
           type="date"
           value={dueDate}
@@ -151,7 +151,7 @@ function TaskForm({ onSave, initialTask }) {
         <Box 
           className="priority-toggle-group" 
           role="radiogroup" 
-          aria-label="Task Priority" 
+          aria-label="Item Priority" 
           data-testid="priority-group"
         >
           {['P1','P2','P3'].map(val => (
@@ -176,8 +176,8 @@ function TaskForm({ onSave, initialTask }) {
             variant="contained" 
             color="primary"
             fullWidth
-            data-testid="submit-task"
-            startIcon={initialTask ? <SaveIcon /> : <AddIcon />}
+            data-testid="submit-item"
+            startIcon={initialItem ? <SaveIcon /> : <AddIcon />}
             sx={{
               borderRadius: 2,
               py: 1,
@@ -186,7 +186,7 @@ function TaskForm({ onSave, initialTask }) {
               fontSize: '0.95rem',
             }}
           >
-            {initialTask ? 'Save Changes' : 'Add Task'}
+            {initialItem ? 'Save Changes' : 'Add Item'}
           </Button>
         </Box>
       </Box>

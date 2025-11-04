@@ -7,12 +7,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import EventIcon from '@mui/icons-material/Event';
 
 function TaskList({ onEdit }) {
-  const [tasks, setTasks] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchTasks();
+    fetchItems();
   }, []);
 
   const formatDueDate = (dateString) => {
@@ -27,13 +27,13 @@ function TaskList({ onEdit }) {
     });
   };
 
-  const fetchTasks = async () => {
+  const fetchItems = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/tasks');
-      if (!response.ok) throw new Error('Failed to fetch tasks');
+      const response = await fetch('/api/items');
+      if (!response.ok) throw new Error('Failed to fetch items');
       const data = await response.json();
-      setTasks(data);
+      setItems(data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -42,44 +42,44 @@ function TaskList({ onEdit }) {
     }
   };
 
-  const handleToggleComplete = async (task) => {
+  const handleToggleComplete = async (item) => {
     try {
-      await fetch(`/api/tasks/${task.id}`, {
+      await fetch(`/api/items/${item.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed: !task.completed })
+        body: JSON.stringify({ completed: !item.completed })
       });
-      fetchTasks();
+      fetchItems();
     } catch (err) {
-      setError('Failed to update task');
+      setError('Failed to update item');
     }
   };
 
-  const handlePriorityChange = async (task, newPriority) => {
+  const handlePriorityChange = async (item, newPriority) => {
     if (!['P1','P2','P3'].includes(newPriority)) return;
     try {
-      await fetch(`/api/tasks/${task.id}`, {
+      await fetch(`/api/items/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: task.title,
-            description: task.description,
-            due_date: task.due_date,
+          title: item.title,
+            description: item.description,
+            due_date: item.due_date,
             priority: newPriority
         })
       });
-      fetchTasks();
+      fetchItems();
     } catch (err) {
-      setError('Failed to change task priority');
+      setError('Failed to change item priority');
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-      fetchTasks();
+      await fetch(`/api/items/${id}`, { method: 'DELETE' });
+      fetchItems();
     } catch (err) {
-      setError('Failed to delete task');
+      setError('Failed to delete item');
     }
   };
 
@@ -128,10 +128,10 @@ function TaskList({ onEdit }) {
           mb: 1.5
         }}
       >
-        Tasks
+  Items
       </Typography>
       <List sx={{ p: 0 }}>
-        {tasks.length === 0 && (
+  {items.length === 0 && (
           <Box 
             sx={{ 
               textAlign: 'center', 
@@ -139,27 +139,27 @@ function TaskList({ onEdit }) {
               color: '#9e9e9e' 
             }}
           >
-            <Typography variant="body2">No tasks found.</Typography>
+            <Typography variant="body2">No items found.</Typography>
           </Box>
         )}
-        {tasks.map((task, index) => (
+        {items.map((item, index) => (
           <ListItem 
-            key={task.id} 
+            key={item.id} 
             sx={{ 
               pr: 18,
               py: 1,
               mb: 1,
               borderRadius: 2,
-              background: task.completed 
+              background: item.completed 
                 ? 'rgba(158, 158, 158, 0.08)' 
                 : 'rgba(25, 118, 210, 0.05)',
               border: '1px solid',
-              borderColor: task.completed 
+              borderColor: item.completed 
                 ? 'rgba(158, 158, 158, 0.15)' 
                 : 'rgba(25, 118, 210, 0.15)',
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
-                background: task.completed 
+                background: item.completed 
                   ? 'rgba(158, 158, 158, 0.12)' 
                   : 'rgba(25, 118, 210, 0.1)',
                 transform: 'translateX(4px)',
@@ -169,8 +169,8 @@ function TaskList({ onEdit }) {
           >
             <Checkbox
               edge="start"
-              checked={!!task.completed}
-              onChange={() => handleToggleComplete(task)}
+              checked={!!item.completed}
+              onChange={() => handleToggleComplete(item)}
               inputProps={{ 'aria-label': 'Mark task complete' }}
               size="small"
               sx={{
@@ -186,26 +186,26 @@ function TaskList({ onEdit }) {
                 <Typography 
                   variant="body2"
                   sx={{ 
-                    textDecoration: task.completed ? 'line-through' : 'none', 
-                    color: task.completed ? '#9e9e9e' : '#212121',
-                    fontWeight: task.completed ? 400 : 600,
+                    textDecoration: item.completed ? 'line-through' : 'none', 
+                    color: item.completed ? '#9e9e9e' : '#212121',
+                    fontWeight: item.completed ? 400 : 600,
                     fontSize: '1rem'
                   }}
                 >
-                  {task.title}
+                  {item.title}
                 </Typography>
               }
               secondary={
-                task.description && (
+                item.description && (
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      color: task.completed ? '#bdbdbd' : '#616161',
+                      color: item.completed ? '#bdbdbd' : '#616161',
                       fontSize: '0.85rem',
                       mt: 0.25
                     }}
                   >
-                    {task.description}
+                    {item.description}
                   </Typography>
                 )
               }
@@ -222,31 +222,31 @@ function TaskList({ onEdit }) {
                 gap: 1
               }}
             >
-              {task.priority && (
+              {item.priority && (
                 <Box 
                   className="priority-toggle-group"
                   role="radiogroup"
-                  aria-label={`Change priority for task ${task.title}`}
+                  aria-label={`Change priority for item ${item.title}`}
                   sx={{ display: 'flex', gap: 0.5 }}
                 >
                   {['P1','P2','P3'].map(p => (
                     <button
                       key={p}
                       type="button"
-                      onClick={() => handlePriorityChange(task, p)}
-                      className={`priority-toggle ${task.priority === p ? 'selected' : ''}`}
+                      onClick={() => handlePriorityChange(item, p)}
+                      className={`priority-toggle ${item.priority === p ? 'selected' : ''}`}
                       role="radio"
-                      aria-checked={task.priority === p}
+                      aria-checked={item.priority === p}
                       aria-label={`Set priority ${p}`}
-                      data-testid={`task-${task.id}-priority-${p.toLowerCase()}`}
+                      data-testid={`item-${item.id}-priority-${p.toLowerCase()}`}
                     >{p}</button>
                   ))}
                 </Box>
               )}
-              {task.due_date && (
+              {item.due_date && (
                 <Chip
                   icon={<EventIcon sx={{ fontSize: 14 }} />}
-                  label={formatDueDate(task.due_date)}
+                  label={formatDueDate(item.due_date)}
                   size="small"
                   sx={{
                     height: 20,
@@ -273,7 +273,7 @@ function TaskList({ onEdit }) {
               >
                 <IconButton 
                   aria-label="edit" 
-                  onClick={() => onEdit(task)}
+                  onClick={() => onEdit(item)}
                   size="small"
                   sx={{
                     color: '#1976d2',
@@ -286,7 +286,7 @@ function TaskList({ onEdit }) {
                 </IconButton>
                 <IconButton 
                   aria-label="delete" 
-                  onClick={() => handleDelete(task.id)}
+                  onClick={() => handleDelete(item.id)}
                   size="small"
                   sx={{
                     color: '#f44336',
