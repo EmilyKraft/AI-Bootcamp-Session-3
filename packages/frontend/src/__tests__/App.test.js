@@ -12,21 +12,22 @@ const server = setupServer(
     return res(
       ctx.status(200),
       ctx.json([
-        { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', completed: 0 },
-        { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', completed: 1 },
+        { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', priority: 'P3', completed: 0 },
+        { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', priority: 'P2', completed: 1 },
       ])
     );
   }),
 
   // POST /api/tasks handler
   rest.post('/api/tasks', (req, res, ctx) => {
-    const { title } = req.body;
+    const { title, priority } = req.body;
     if (!title || title.trim() === '') {
       return res(
         ctx.status(400),
         ctx.json({ error: 'Task title is required' })
       );
     }
+    const safePriority = ['P1','P2','P3'].includes(priority) ? priority : 'P3';
     return res(
       ctx.status(201),
       ctx.json({
@@ -34,6 +35,7 @@ const server = setupServer(
         title,
         description: req.body.description || '',
         due_date: req.body.due_date || null,
+        priority: safePriority,
         completed: 0,
       })
     );
@@ -86,22 +88,24 @@ describe('TODO App', () => {
     });
   });
 
-  test('adds a new task', async () => {
+  test('adds a new task with selected priority', async () => {
     let tasks = [
-      { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', completed: 0 },
-      { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', completed: 1 },
+      { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', priority: 'P3', completed: 0 },
+      { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', priority: 'P2', completed: 1 },
     ];
     server.use(
       rest.get('/api/tasks', (req, res, ctx) => {
         return res(ctx.status(200), ctx.json(tasks));
       }),
       rest.post('/api/tasks', (req, res, ctx) => {
-        const { title, description } = req.body;
+        const { title, description, priority } = req.body;
+        const safePriority = ['P1','P2','P3'].includes(priority) ? priority : 'P3';
         const newTask = {
           id: 3,
           title,
           description: description || '',
           due_date: req.body.due_date || null,
+          priority: safePriority,
           completed: 0,
         };
         tasks = [...tasks, newTask];
@@ -109,18 +113,26 @@ describe('TODO App', () => {
       })
     );
     const user = userEvent.setup();
-    await act(async () => {
-      render(<App />);
-    });
-    await waitFor(() => {
-      expect(screen.getByText('Test Task 1')).toBeInTheDocument();
-    });
+    await act(async () => { render(<App />); });
+    await waitFor(() => { expect(screen.getByText('Test Task 1')).toBeInTheDocument(); });
     await user.type(screen.getByTestId('title-input'), 'New Test Task');
     await user.type(screen.getByTestId('description-input'), 'Task description');
+    // Select P1 priority before submit
+    await user.click(screen.getByTestId('priority-p1'));
     await user.click(screen.getByTestId('submit-task'));
     await waitFor(() => {
       expect(screen.getByText(/New Test Task/i)).toBeInTheDocument();
+      expect(screen.getAllByText('P1').length).toBeGreaterThan(0);
     });
+  });
+
+  test('renders priority selector with default P3', async () => {
+    await act(async () => {
+      render(<App />);
+    });
+    const p3Btn = screen.getByTestId('priority-p3');
+    expect(p3Btn).toBeInTheDocument();
+    expect(p3Btn).toHaveClass('Mui-selected');
   });
 
   test('handles API error', async () => {

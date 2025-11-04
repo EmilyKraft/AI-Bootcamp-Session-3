@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Paper, Typography, Box } from '@mui/material';
+import { TextField, Button, Paper, Typography, Box, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 
@@ -7,6 +7,7 @@ function TaskForm({ onSave, initialTask }) {
   const [title, setTitle] = useState(initialTask?.title || '');
   const [description, setDescription] = useState(initialTask?.description || '');
   const [dueDate, setDueDate] = useState(initialTask?.due_date || '');
+  const [priority, setPriority] = useState(initialTask?.priority || 'P3');
   const [error, setError] = useState(null);
 
   // Helper to normalize date string to YYYY-MM-DD format
@@ -30,10 +31,12 @@ function TaskForm({ onSave, initialTask }) {
       setTitle(initialTask.title || '');
       setDescription(initialTask.description || '');
       setDueDate(normalizeDateString(initialTask.due_date));
+      setPriority(initialTask.priority || 'P3');
     } else {
       setTitle('');
       setDescription('');
       setDueDate('');
+      setPriority('P3');
     }
   }, [initialTask]);
 
@@ -44,10 +47,12 @@ function TaskForm({ onSave, initialTask }) {
       return;
     }
     setError(null);
-    await onSave({ title, description, due_date: dueDate });
+    const safePriority = ['P1','P2','P3'].includes(priority) ? priority : 'P3';
+    await onSave({ title, description, due_date: dueDate, priority: safePriority });
     setTitle('');
     setDescription('');
     setDueDate('');
+    setPriority('P3');
   };
 
   return (
@@ -143,6 +148,60 @@ function TaskForm({ onSave, initialTask }) {
             }
           }}
         />
+        <ToggleButtonGroup
+          value={priority}
+          exclusive
+          onChange={(e, val) => { if (val) setPriority(val); }}
+          size="small"
+          aria-label="Task Priority"
+          data-testid="priority-group"
+          sx={{
+            display: 'flex',
+            gap: 1,
+            '& .MuiToggleButton-root': {
+              flex: 1,
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 2,
+              py: 0.75
+            }
+          }}
+        >
+          <ToggleButton
+            value="P1"
+            aria-label="Priority P1"
+            data-testid="priority-p1"
+            sx={{
+              backgroundColor: priority === 'P1' ? '#d32f2f' : 'rgba(211,47,47,0.12)',
+              color: priority === 'P1' ? '#fff' : '#d32f2f',
+              '&.Mui-selected': { backgroundColor: '#d32f2f', color: '#fff' },
+              '&:hover': { backgroundColor: '#d32f2f', color: '#fff' }
+            }}
+          >P1</ToggleButton>
+          <ToggleButton
+            value="P2"
+            aria-label="Priority P2"
+            data-testid="priority-p2"
+            sx={{
+              backgroundColor: priority === 'P2' ? '#ff9800' : 'rgba(255,152,0,0.18)',
+              color: priority === 'P2' ? '#fff' : '#ef6c00',
+              '&.Mui-selected': { backgroundColor: '#ff9800', color: '#fff' },
+              '&:hover': { backgroundColor: '#ff9800', color: '#fff' }
+            }}
+          >P2</ToggleButton>
+          <ToggleButton
+            value="P3"
+            aria-label="Priority P3"
+            data-testid="priority-p3"
+            sx={{
+              backgroundColor: priority === 'P3' ? '#9e9e9e' : 'rgba(158,158,158,0.18)',
+              color: priority === 'P3' ? '#fff' : '#616161',
+              '&.Mui-selected': { backgroundColor: '#9e9e9e', color: '#fff' },
+              '&:hover': { backgroundColor: '#9e9e9e', color: '#fff' }
+            }}
+          >P3</ToggleButton>
+        </ToggleButtonGroup>
         {error && <Typography color="error" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>{error}</Typography>}
         <Box display="flex" gap={2}>
           <Button 
